@@ -12,32 +12,46 @@ CREATE TABLE usuario(
     cnpj CHAR(14) UNIQUE NOT NULL,
     email VARCHAR(30) UNIQUE NOT NULL,
     senha VARCHAR(20) NOT NULL,
+    telefone CHAR(11),
+    fkEndereco int,
+    
+    constraint fk_endereco foreign key (fkEndereco) references endereco(idEndereco)
+);
+
+CREATE TABLE endereco(
+    idEndereco INT PRIMARY KEY AUTO_INCREMENT,
     cep CHAR(8) NOT NULL,
-    telefone CHAR(11)
+    rua VARCHAR(100) NOT NULL,
+    numero VARCHAR(10) NOT NULL,
+    complemento VARCHAR(50),
+    bairro VARCHAR(50) NOT NULL,
+    cidade VARCHAR(50) NOT NULL,
+    estado CHAR(2) NOT NULL
 );
 
 CREATE TABLE descSensor(
 	idSensor INT PRIMARY KEY AUTO_INCREMENT,
-    modelo VARCHAR(40),
+    modelo VARCHAR(40) NOT NULL,
     dataInstalacao DATETIME,
     localInstalacao VARCHAR(50),
-    tipoLeitura VARCHAR(30),
-    numSerie VARCHAR(20) UNIQUE,
+    tipoLeitura VARCHAR(30) NOT NULL,
+    numSerie VARCHAR(20) UNIQUE NOT NULL,
     fkUsuario int,
     
     constraint fk_usuario foreign key (fkUsuario) references usuario(idUsuario)
 );
 
 CREATE TABLE dadosSensor(
-	idDados INT PRIMARY KEY AUTO_INCREMENT ,
+	idDados INT AUTO_INCREMENT ,
     dado FLOAT,
     statusSensor VARCHAR(15),
 	dtDado DATETIME DEFAULT CURRENT_TIMESTAMP,
     fkSensor int,
     fkUsuario int,
     
-    constraint fk_sensor foreign key (fkSensor) references descSensor(idSensor),
-    constraint fk_usuario1 foreign key (fkUsuario) references usuario(idUsuario)
+    constraint fk_composta_dadpsSensor primary key (idDados,fkSensor),
+    constraint fk_usuario1 foreign key (fkUsuario) references usuario(idUsuario),
+    constraint fk_sensor foreign key (fkSensor) references descSensor(idSensor)
 );
 
 
@@ -47,18 +61,25 @@ DESCRIBE dadossensor;
 DESCRIBE descsensor;
 DESCRIBE usuario;
 
-insert into usuario(razaoSocial,cnpj,email,senha,cep,telefone) values
-	('Oqliveira Master','12145678000199','oleveiramaster@gmail.com','11345','00001000','21993204456');
 
-insert into descSensor(modelo,dataInstalacao,localInstalacao,tipoLeitura,numSerie,fkUsuario) values
-	('Umiwdade de Solo Capac	tivo', '2024-03-01 10:30:00', 'Setor Npte', 'pmidade dSolo', 'OP12345678',3);
+insert into usuario (razaoSocial, cnpj, email, senha, telefone, fkEndereco) values
+('Empresa Aqua SP', '12345678000199', 'contato@aquasp.com', 'senha123', '11999999999', 1),
+('Empresa RioTech', '98765432000188', 'rio@tecnologia.com', 'rio12345', '21988888888', 2);
+
+insert into endereco (cep, rua, numero, complemento, bairro, cidade, estado) values
+('01001000', 'Rua da Empresa 1', '123', 'Sala 5', 'Centro', 'São Paulo', 'SP'),
+('20040030', 'Avenida da Empresa 2', '456', NULL, 'Copacabana', 'Rio de Janeiro', 'RJ');
+
+insert into descSensor (modelo, dataInstalacao, localInstalacao, tipoLeitura, numSerie, fkUsuario) values
+('Umidade de Solo Capacitivo', '2024-01-10 10:00:00', 'Setor 1', 'Umidade de solo', 'SX001A', 1),
+('Umidade de Solo Capacitivo', '2024-02-15 14:30:00', 'Setor 1', 'Umidade de solo', 'SY002B', 2);
     
 insert into dadosSensor (dado,statusSensor,dtDado,fkSensor,fkUsuario) values
-	(34.5, 'Ativo','2024-03-01 08:30:00',1,1),
-	(28.2, 'Ativo','2024-03-01 08:30:30',1,1),
-	(22.7, 'Inativo','2024-03-01 08:31:00',1,1),
-	(40.3, 'Ativo','2024-03-01 08:31:30',1,1),
-	(19.8, 'Inativo','2024-03-01 08:32:00',1,1);
+	(34.5, 'Ativo',default,1,1),
+	(28.2, 'Ativo',default,1,1),
+	(22.7, 'Ativo',default,2,2),
+	(40.3, 'Ativo',default,2,2);
+	
     
     SELECT * FROM dadosSensor;
     SELECT * FROM usuario;
@@ -94,7 +115,7 @@ SELECT
 FROM usuario u
 JOIN descSensor s ON u.idUsuario = s.fkUsuario
 JOIN dadosSensor d ON s.idSensor = d.fkSensor
-WHERE u.idUsuario = 3;
+WHERE u.idUsuario = 2;
 
 -- Mostrar todos os sensores, mesmo os que ainda não têm dados registrados. LEFT JOIN
 SELECT 
