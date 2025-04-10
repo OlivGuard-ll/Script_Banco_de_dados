@@ -47,10 +47,8 @@ CREATE TABLE dadosSensor(
     statusSensor VARCHAR(15),
 	dtDado DATETIME DEFAULT CURRENT_TIMESTAMP,
     fkSensor int,
-    fkUsuario int,
     
     constraint fk_composta_dadpsSensor primary key (idDados,fkSensor),
-    constraint fk_usuario1 foreign key (fkUsuario) references usuario(idUsuario),
     constraint fk_sensor foreign key (fkSensor) references descSensor(idSensor)
 );
 
@@ -84,6 +82,7 @@ insert into dadosSensor (dado,statusSensor,dtDado,fkSensor,fkUsuario) values
     SELECT * FROM dadosSensor;
     SELECT * FROM usuario;
     SELECT * FROM descSensor;
+    
 -- EXEMPLO 1:1
 -- Pensando que cada usuário tenha apenas um sensor. Aqui vemos o nome da empresa
 -- e o modelo do sensor junto com o número de série.
