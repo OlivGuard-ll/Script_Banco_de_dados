@@ -86,6 +86,7 @@ insert into dadosSensor (dado,statusSensor,dtDado,fkSensor,fkUsuario) values
 -- EXEMPLO 1:1
 -- Pensando que cada usuário tenha apenas um sensor. Aqui vemos o nome da empresa
 -- e o modelo do sensor junto com o número de série.
+
 SELECT u.razaoSocial AS "Razão social", u.email AS "Email", s.modelo AS "Modelo do sensor", 
 s.numSerie AS "Número de série"
 FROM usuario u
