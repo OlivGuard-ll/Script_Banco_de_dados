@@ -1,4 +1,5 @@
--- NOME DO PROJETO: OlivGuard;
+-- NOME DO PROJETO: OlivGuard
+drop database projetopi;
 CREATE DATABASE projetoPI;
 USE projetoPI;
 
@@ -17,12 +18,22 @@ CREATE TABLE Empresa (
     idEmpresa INT PRIMARY KEY AUTO_INCREMENT,
     razaoSocial VARCHAR(50) NOT NULL,
     cnpj CHAR(14) UNIQUE NOT NULL,
-    email VARCHAR(30) UNIQUE NOT NULL,
-    senha VARCHAR(20) NOT NULL,
-    telefone CHAR(11),
+    codigo_ativacao VARCHAR(50),
     fkEndereco INT,
     
     CONSTRAINT fk_endereco FOREIGN KEY (fkEndereco) REFERENCES endereco(idEndereco)
+);
+
+CREATE TABLE Usuario(
+    idUsuario INT AUTO_INCREMENT,
+    nome VARCHAR(20) NOT NULL,
+    sobrenome VARCHAR(20) NOT NULL, 
+    email VARCHAR(30) UNIQUE NOT NULL,
+    senha VARCHAR(20) NOT NULL,
+    fkEmpresa INT,
+    
+    CONSTRAINT fk_CompostaUserEmpresa PRIMARY KEY (idUsuario,fkEmpresa),
+    CONSTRAINT fk_empresaUser FOREIGN KEY (fkEmpresa) REFERENCES Empresa(idEmpresa)
 );
 
 CREATE TABLE Sensor (
@@ -37,52 +48,58 @@ CREATE TABLE Sensor (
     CONSTRAINT fk_empresa FOREIGN KEY (fkEmpresa) REFERENCES Empresa(idEmpresa)
 );
 
+
 CREATE TABLE Dados (
-    idDados INT AUTO_INCREMENT,
-    dado FLOAT,
+    idLeitura INT AUTO_INCREMENT,
+    leitura FLOAT,
+    unidadeDeMedida CHAR(1),
+    maximo CHAR (3),
+    minimo CHAR (3),
     statusSensor VARCHAR(15),
-    dtDado DATETIME DEFAULT CURRENT_TIMESTAMP,
+    dtLeitura DATETIME DEFAULT CURRENT_TIMESTAMP,
     fkSensor INT,
     
-    CONSTRAINT fk_composta_dadosSensor PRIMARY KEY (idDados, fkSensor),
+    CONSTRAINT fk_composta_dadosSensor PRIMARY KEY (idLeitura, fkSensor),
     CONSTRAINT fk_sensor FOREIGN KEY (fkSensor) REFERENCES Sensor(idSensor)
 );
 
 
 SHOW TABLES;
 
+
 DESCRIBE endereco;
-DESCRIBE usuario;
-DESCRIBE descSensor;
-DESCRIBE dadosSensor;
+DESCRIBE Usuario;
+DESCRIBE Sensor;
+DESCRIBE Dados;
+
 
 INSERT INTO endereco (cep, rua, numero, complemento, bairro, cidade, estado) VALUES
 ('01001000', 'Rua da Empresa 1', '123', 'Sala 5', 'Centro', 'São Paulo', 'SP'),
 ('20040030', 'Avenida da Empresa 2', '456', NULL, 'Copacabana', 'Rio de Janeiro', 'RJ');
 
--- Inserir usuários
-INSERT INTO empresa (razaoSocial, cnpj, email, senha, telefone, fkEndereco) VALUES
-('Empresa Aqua SP', '12345678000199', 'contato@aquasp.com', 'senha123', '11999999999', 1),
-('Empresa RioTech', '98765432000188', 'rio@tecnologia.com', 'rio12345', '21988888888', 2);
+INSERT INTO Empresa (razaoSocial, cnpj, codigo_ativacao, fkEndereco) VALUES
+('Empresa Aqua SP', '12345678000199', 'AQUA123', 1),
+('Empresa RioTech', '98765432000188', 'RIOTECH456', 2);
 
--- Inserir sensores
+INSERT INTO Usuario (nome, sobrenome, email, senha, fkEmpresa) VALUES
+('João', 'Silva', 'joao.silva@aquasp.com', 'senhaJoao', 1),
+('Maria', 'Oliveira', 'maria.oliveira@riotech.com', 'senhaMaria', 2);
+
 INSERT INTO Sensor (modelo, dataInstalacao, localInstalacao, tipoLeitura, numSerie, fkEmpresa) VALUES
 ('Umidade de Solo Capacitivo', '2024-01-10 10:00:00', 'Setor 1', 'Umidade de solo', 'SX001A', 1),
 ('Umidade de Solo Capacitivo', '2024-02-15 14:30:00', 'Setor 1', 'Umidade de solo', 'SY002B', 2);
 
--- Inserir dados de sensores
-INSERT INTO Dados (dado, statusSensor, dtDado, fkSensor) VALUES
-(34.5, 'Ativo', DEFAULT, 1),
-(28.2, 'Ativo', DEFAULT, 1),
-(22.7, 'Ativo', DEFAULT, 2),
-(40.3, 'Ativo', DEFAULT, 2);
+INSERT INTO Dados (leitura, unidadeDeMedida, maximo, minimo, statusSensor, fkSensor) VALUES
+(34.5, '%', '80%', '50%', 'Ativo', 1),
+(28.2, '%', '80%', '50%', 'Ativo', 1),
+(22.7, '%', '80%', '50%', 'Ativo', 2),
+(40.3, '%', '80%', '50%', 'Ativo', 2);
 	
-    
     SELECT * FROM Dados;
     SELECT * FROM usuario;
     SELECT * FROM Sensor;
     
-SELECT e.razaoSocial AS "Razão social", s.modelo AS "Modelo", s.localInstalacao AS "Setor", d.dado AS "Leitura", d.statusSensor AS "Status", d.dtDado AS "Data"
+SELECT e.razaoSocial AS "Razão social", s.modelo AS "Modelo", s.localInstalacao AS "Setor", d.leitura AS "Leitura", d.statusSensor AS "Status", d.dtLeitura AS "Data"
 FROM empresa e
 JOIN Sensor s ON e.idEmpresa = s.fkEmpresa
 JOIN Dados d ON s.idSensor = d.fkSensor
@@ -90,7 +107,7 @@ WHERE e.idEmpresa = 2;
 
 -- 1:1
 -- Pensando que cada usuário tenha apenas um sensor. Aqui vemos o nome da empresa e o modelo do sensor junto com o número de série.
-SELECT e.razaoSocial AS "Razão social", e.email AS "Email", s.modelo AS "Modelo do sensor", 
+SELECT e.razaoSocial AS "Razão social", s.modelo AS "Modelo do sensor", 
 s.numSerie AS "Número de série"
 FROM empresa e
 JOIN Sensor s ON e.idEmpresa = s.fkEmpresa;
@@ -104,7 +121,7 @@ JOIN Sensor s ON e.idEmpresa = s.fkEmpresa;
 
 
 -- Listar todos os dados registrados por um sensor:
-SELECT s.numSerie, d.dado, d.dtDado, d.statusSensor
+SELECT s.numSerie, d.leitura, d.dtLeitura, d.statusSensor
 FROM Sensor s
 JOIN Dados d ON s.idSensor = d.fkSensor
 WHERE s.idSensor = 1;
@@ -114,9 +131,9 @@ SELECT
     e.razaoSocial,
     s.modelo,
     s.localInstalacao,
-    d.dado,
+    d.leitura,
     d.statusSensor,
-    d.dtDado
+    d.dtLeitura
 FROM empresa e
 JOIN Sensor s ON e.idEmpresa = s.fkEmpresa
 JOIN Dados d ON s.idSensor = d.fkSensor
@@ -126,17 +143,17 @@ WHERE e.idEmpresa = 2;
 SELECT 
     s.numSerie,
     s.localInstalacao,
-    d.dado,
-    d.dtDado
+    d.leitura,
+    d.dtLeitura
 FROM Sensor s
 LEFT JOIN Dados d ON s.idSensor = d.fkSensor;
 
 -- Mostrar os dados ordenados por data (do mais recente ao mais antigo)
 SELECT 
-    d.dado,
-    d.dtDado,
+    d.leitura,
+    d.dtleitura,
     d.statusSensor
 FROM Dados d
-ORDER BY d.dtDado DESC;
+ORDER BY d.dtLeitura DESC;
 
 SELECT * from Dados;
