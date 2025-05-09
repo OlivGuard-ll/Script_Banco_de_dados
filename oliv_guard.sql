@@ -36,6 +36,17 @@ CREATE TABLE Usuario(
     CONSTRAINT fk_empresaUser FOREIGN KEY (fkEmpresa) REFERENCES Empresa(idEmpresa)
 );
 
+CREATE TABLE Usuario_Sensor (
+	idUsuarioSensor INT,
+    fkUsuario INT,
+    fkSensor INT,
+    dataAssociacao DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    CONSTRAINT pk_usuario_sensor PRIMARY KEY (idUsuarioSensor, fkUsuario, fkSensor),
+    CONSTRAINT fk_usuario FOREIGN KEY (fkUsuario) REFERENCES Usuario(idUsuario),
+    CONSTRAINT fk_sensor_usuario FOREIGN KEY (fkSensor) REFERENCES Sensor(idSensor)
+);
+
 CREATE TABLE Sensor (
     idSensor INT PRIMARY KEY AUTO_INCREMENT,
     modelo VARCHAR(40) NOT NULL,
