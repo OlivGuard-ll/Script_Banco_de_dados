@@ -18,7 +18,7 @@ CREATE TABLE Empresa (
     idEmpresa INT PRIMARY KEY AUTO_INCREMENT,
     razaoSocial VARCHAR(50) NOT NULL,
     cnpj CHAR(14) UNIQUE NOT NULL,
-    codigo_ativacao VARCHAR(50),
+    codigo_ativacao VARCHAR(50) UNIQUE NOT NULL,
     fkEndereco INT,
     
     CONSTRAINT fk_endereco FOREIGN KEY (fkEndereco) REFERENCES endereco(idEndereco)
@@ -36,8 +36,22 @@ CREATE TABLE Usuario(
     CONSTRAINT fk_empresaUser FOREIGN KEY (fkEmpresa) REFERENCES Empresa(idEmpresa)
 );
 
+
+CREATE TABLE Sensor (
+    idSensor INT PRIMARY KEY AUTO_INCREMENT,
+    modelo VARCHAR(40) NOT NULL,
+    dataInstalacao DATETIME,
+    localInstalacao VARCHAR(50) NOT NULL,
+    tipoLeitura VARCHAR(30) NOT NULL,
+    numSerie VARCHAR(20) UNIQUE NOT NULL,
+    fkEmpresa INT,
+    
+    CONSTRAINT fk_empresa FOREIGN KEY (fkEmpresa) REFERENCES Empresa(idEmpresa)
+);
+
+
 CREATE TABLE Usuario_Sensor (
-	idUsuarioSensor INT,
+	idUsuarioSensor INT AUTO_INCREMENT,
     fkUsuario INT,
     fkSensor INT,
     dataAssociacao DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -47,20 +61,8 @@ CREATE TABLE Usuario_Sensor (
     CONSTRAINT fk_sensor_usuario FOREIGN KEY (fkSensor) REFERENCES Sensor(idSensor)
 );
 
-CREATE TABLE Sensor (
-    idSensor INT PRIMARY KEY AUTO_INCREMENT,
-    modelo VARCHAR(40) NOT NULL,
-    dataInstalacao DATETIME,
-    localInstalacao VARCHAR(50),
-    tipoLeitura VARCHAR(30) NOT NULL,
-    numSerie VARCHAR(20) UNIQUE NOT NULL,
-    fkEmpresa INT,
-    
-    CONSTRAINT fk_empresa FOREIGN KEY (fkEmpresa) REFERENCES Empresa(idEmpresa)
-);
 
-
-CREATE TABLE Dados (
+CREATE TABLE Leitura (
     idLeitura INT AUTO_INCREMENT,
     leitura FLOAT,
     unidadeDeMedida CHAR(1),
@@ -70,7 +72,7 @@ CREATE TABLE Dados (
     dtLeitura DATETIME DEFAULT CURRENT_TIMESTAMP,
     fkSensor INT,
     
-    CONSTRAINT fk_composta_dadosSensor PRIMARY KEY (idLeitura, fkSensor),
+    CONSTRAINT fk_composta_LeituraSensor PRIMARY KEY (idLeitura, fkSensor),
     CONSTRAINT fk_sensor FOREIGN KEY (fkSensor) REFERENCES Sensor(idSensor)
 );
 
@@ -81,7 +83,7 @@ SHOW TABLES;
 DESCRIBE endereco;
 DESCRIBE Usuario;
 DESCRIBE Sensor;
-DESCRIBE Dados;
+DESCRIBE Leitura;
 
 
 INSERT INTO endereco (cep, rua, numero, complemento, bairro, cidade, estado) VALUES
@@ -100,21 +102,29 @@ INSERT INTO Sensor (modelo, dataInstalacao, localInstalacao, tipoLeitura, numSer
 ('Umidade de Solo Capacitivo', '2024-01-10 10:00:00', 'Setor 1', 'Umidade de solo', 'SX001A', 1),
 ('Umidade de Solo Capacitivo', '2024-02-15 14:30:00', 'Setor 1', 'Umidade de solo', 'SY002B', 2);
 
-INSERT INTO Dados (leitura, unidadeDeMedida, maximo, minimo, statusSensor, fkSensor) VALUES
+INSERT INTO Leitura (leitura, unidadeDeMedida, maximo, minimo, statusSensor, fkSensor) VALUES
 (34.5, '%', '80%', '50%', 'Ativo', 1),
 (28.2, '%', '80%', '50%', 'Ativo', 1),
 (22.7, '%', '80%', '50%', 'Ativo', 2),
 (40.3, '%', '80%', '50%', 'Ativo', 2);
 	
-    SELECT * FROM Dados;
+    SELECT * FROM Leitura;
     SELECT * FROM usuario;
     SELECT * FROM Sensor;
-    
+   
+   
+   
+   
+   
 SELECT e.razaoSocial AS "Razão social", s.modelo AS "Modelo", s.localInstalacao AS "Setor", d.leitura AS "Leitura", d.statusSensor AS "Status", d.dtLeitura AS "Data"
 FROM empresa e
 JOIN Sensor s ON e.idEmpresa = s.fkEmpresa
-JOIN Dados d ON s.idSensor = d.fkSensor
+JOIN Leitura d ON s.idSensor = d.fkSensor
 WHERE e.idEmpresa = 2;
+
+
+
+
 
 -- 1:1
 -- Pensando que cada usuário tenha apenas um sensor. Aqui vemos o nome da empresa e o modelo do sensor junto com o número de série.
@@ -131,13 +141,13 @@ FROM empresa e
 JOIN Sensor s ON e.idEmpresa = s.fkEmpresa;
 
 
--- Listar todos os dados registrados por um sensor:
+-- Listar todos os Leitura registrados por um sensor:
 SELECT s.numSerie, d.leitura, d.dtLeitura, d.statusSensor
 FROM Sensor s
-JOIN Dados d ON s.idSensor = d.fkSensor
+JOIN Leitura d ON s.idSensor = d.fkSensor
 WHERE s.idSensor = 1;
 
--- Obter todos os dados com informações completas de sensor e do usuário:
+-- Obter todos os Leitura com informações completas de sensor e do usuário:
 SELECT 
     e.razaoSocial,
     s.modelo,
@@ -147,24 +157,24 @@ SELECT
     d.dtLeitura
 FROM empresa e
 JOIN Sensor s ON e.idEmpresa = s.fkEmpresa
-JOIN Dados d ON s.idSensor = d.fkSensor
+JOIN Leitura d ON s.idSensor = d.fkSensor
 WHERE e.idEmpresa = 2;
 
--- Mostrar todos os sensores, mesmo os que ainda não têm dados registrados. LEFT JOIN
+-- Mostrar todos os sensores, mesmo os que ainda não têm Leitura registrados. LEFT JOIN
 SELECT 
     s.numSerie,
     s.localInstalacao,
     d.leitura,
     d.dtLeitura
 FROM Sensor s
-LEFT JOIN Dados d ON s.idSensor = d.fkSensor;
+LEFT JOIN Leitura d ON s.idSensor = d.fkSensor;
 
--- Mostrar os dados ordenados por data (do mais recente ao mais antigo)
+-- Mostrar os Leitura ordenados por data (do mais recente ao mais antigo)
 SELECT 
     d.leitura,
     d.dtleitura,
     d.statusSensor
-FROM Dados d
+FROM Leitura d
 ORDER BY d.dtLeitura DESC;
 
-SELECT * from Dados;
+SELECT * from Leitura;
