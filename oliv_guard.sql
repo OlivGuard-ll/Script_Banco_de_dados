@@ -40,7 +40,6 @@ CREATE TABLE Usuario(
 CREATE TABLE Sensor (
     idSensor INT PRIMARY KEY AUTO_INCREMENT,
     modelo VARCHAR(40) NOT NULL,
-    dataInstalacao DATETIME,
     localInstalacao VARCHAR(50) NOT NULL,
     tipoLeitura VARCHAR(30) NOT NULL,
     numSerie VARCHAR(20) UNIQUE NOT NULL,
@@ -54,7 +53,6 @@ CREATE TABLE Usuario_Sensor (
 	idUsuarioSensor INT AUTO_INCREMENT,
     fkUsuario INT,
     fkSensor INT,
-    dataAssociacao DATETIME DEFAULT CURRENT_TIMESTAMP,
     
     CONSTRAINT pk_usuario_sensor PRIMARY KEY (idUsuarioSensor, fkUsuario, fkSensor),
     CONSTRAINT fk_usuario FOREIGN KEY (fkUsuario) REFERENCES Usuario(idUsuario),
@@ -98,9 +96,9 @@ INSERT INTO Usuario (nome, sobrenome, email, senha, fkEmpresa) VALUES
 ('João', 'Silva', 'joao.silva@aquasp.com', 'senhaJoao', 1),
 ('Maria', 'Oliveira', 'maria.oliveira@riotech.com', 'senhaMaria', 2);
 
-INSERT INTO Sensor (modelo, dataInstalacao, localInstalacao, tipoLeitura, numSerie, fkEmpresa) VALUES
-('Umidade de Solo Capacitivo', '2024-01-10 10:00:00', 'Setor 1', 'Umidade de solo', 'SX001A', 1),
-('Umidade de Solo Capacitivo', '2024-02-15 14:30:00', 'Setor 1', 'Umidade de solo', 'SY002B', 2);
+INSERT INTO Sensor (modelo, localInstalacao, tipoLeitura, numSerie, fkEmpresa) VALUES
+('Umidade de Solo Capacitivo', 'Setor 1', 'Umidade de solo', 'SX001A', 1),
+('Umidade de Solo Capacitivo', 'Setor 1', 'Umidade de solo', 'SY002B', 2);
 
 INSERT INTO Leitura (leitura, unidadeDeMedida, maximo, minimo, statusSensor, fkSensor) VALUES
 (34.5, '%', '80%', '50%', 'Ativo', 1),
