@@ -1,5 +1,5 @@
 -- NOME DO PROJETO: OlivGuard
-drop database projetopi;
+
 CREATE DATABASE projetoPI;
 USE projetoPI;
 
@@ -14,7 +14,7 @@ CREATE TABLE endereco (
     estado CHAR(2) NOT NULL
 );
 
-CREATE TABLE Empresa (
+CREATE TABLE empresa (
     idEmpresa INT PRIMARY KEY AUTO_INCREMENT,
     razaoSocial VARCHAR(50) NOT NULL,
     cnpj CHAR(14) UNIQUE NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE Empresa (
     CONSTRAINT fk_endereco FOREIGN KEY (fkEndereco) REFERENCES endereco(idEndereco)
 );
 
-CREATE TABLE Usuario(
+CREATE TABLE usuario(
     idUsuario INT AUTO_INCREMENT,
     nome VARCHAR(20) NOT NULL,
     sobrenome VARCHAR(20) NOT NULL, 
@@ -37,7 +37,7 @@ CREATE TABLE Usuario(
 );
 
 
-CREATE TABLE Sensor (
+CREATE TABLE sensor (
     idSensor INT PRIMARY KEY AUTO_INCREMENT,
     modelo VARCHAR(40) NOT NULL,
     localInstalacao VARCHAR(50) NOT NULL,
@@ -49,7 +49,7 @@ CREATE TABLE Sensor (
 );
 
 
-CREATE TABLE Usuario_Sensor (
+CREATE TABLE usuario_Sensor (
 	idUsuarioSensor INT AUTO_INCREMENT,
     fkUsuario INT,
     fkSensor INT,
@@ -60,7 +60,7 @@ CREATE TABLE Usuario_Sensor (
 );
 
 
-CREATE TABLE Leitura (
+CREATE TABLE leitura (
     idLeitura INT AUTO_INCREMENT,
     leitura FLOAT,
     unidadeDeMedida CHAR(1),
@@ -105,13 +105,22 @@ INSERT INTO Leitura (leitura, unidadeDeMedida, maximo, minimo, statusSensor, fkS
 (28.2, '%', '80%', '50%', 'Ativo', 1),
 (22.7, '%', '80%', '50%', 'Ativo', 2),
 (40.3, '%', '80%', '50%', 'Ativo', 2);
-	
+
+
+
+INSERT INTO Leitura (leitura, unidadeDeMedida, maximo, minimo, statusSensor, fkSensor) VALUES
+(55.5, '%', '80%', '50%', 'Ativo', 3),
+(45.2, '%', '80%', '50%', 'Ativo', 3),
+(65.2, '%', '80%', '50%', 'Ativo', 3),
+(57.2, '%', '80%', '50%', 'Ativo', 3);	
+
+
     SELECT * FROM Leitura;
     SELECT * FROM usuario;
     SELECT * FROM Sensor;
    
-   
-   
+INSERT INTO Sensor (modelo, localInstalacao, tipoLeitura, numSerie, fkEmpresa) VALUES
+('Umidade de Solo Capacitivo', 'Setor 2', 'Umidade de solo', 'SX001B', 1);
    
    
 SELECT e.razaoSocial AS "Razão social", s.modelo AS "Modelo", s.localInstalacao AS "Setor", d.leitura AS "Leitura", d.statusSensor AS "Status", d.dtLeitura AS "Data"
